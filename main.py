@@ -91,7 +91,7 @@ for discipline in discipline_options:
                 if college['slug'] == slug:
                     college[discipline + '_rank'] = rank
                     found_college = True
-                    break;
+                    break
             
             
             if not found_college:
