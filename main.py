@@ -14,17 +14,17 @@ discipline_options_els = soup.find(id='discipline-select').find_all('option')
 discipline_options = []
 
 for el in discipline_options_els:
-    discipline_options.append(el.text.lower().replace(' ', '-').strip())
+    discipline_options.append(el.text.lower().strip().replace(' ', '-').strip())
 
+all_colleges = []
 
 
 for discipline in discipline_options:
-    for i in range(0, 91):
+    for i in range(0, 1): # change to 91 when looking for full data
         DISCIPLINE_URL = 'https://academicinfluence.com/schools?country=United+States+of+America&discipline=' + discipline + '&page=' + str(i)
         discipline_page = requests.get(DISCIPLINE_URL)
         college_per_discipline_soup = BeautifulSoup(discipline_page.content, 'html.parser')
         all_college_items = college_per_discipline_soup.find_all('div', class_='school-card')
-        all_college_info = []
         for college_item in all_college_items:
             #region Desirability, Infuelence, Name, Rank
             rank = int(college_item.find('div', class_='school-card__rank').text.replace('#', '').strip())
@@ -86,26 +86,30 @@ for discipline in discipline_options:
                 city = location[0]
                 state = location[1].strip()
             #endregion
+            found_college = False
+            for college in all_colleges:
+                if college['slug'] == slug:
+                    college[discipline + '_rank'] = rank
+                    found_college = True
+                    break;
             
-            indv_college_info = {
-                'rank': rank,
-                'school_name': school_name,
-                'influence': influence,
-                'desirability': desirability,
-                'city': city,
-                'state': state,
-                'tuition': tuition,
-                'acceptence': acceptence,
-                'grad_rate': grad_rate,
-                'student_body': student_body,
-                'sat': sat,
-                'act': act,
-                'slug': slug
-            }
             
-
+            if not found_college:
+                all_colleges.append({
+                    discipline + '_rank': rank,
+                    'school_name': school_name,
+                    'influence': influence,
+                    'desirability': desirability,
+                    'city': city,
+                    'state': state,
+                    'tuition': tuition,
+                    'acceptence': acceptence,
+                    'grad_rate': grad_rate,
+                    'student_body': student_body,
+                    'sat': sat,
+                    'act': act,
+                    'slug': slug
+                })
     
+    break # remove when not testing
 
-
-    
-    
