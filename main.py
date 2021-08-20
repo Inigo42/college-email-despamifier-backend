@@ -33,7 +33,7 @@ for discipline in discipline_options:
             influence = ''
             desirability = ''
             if influence_el != None:
-                influence = influence_el.text.replace('#', '').replace('overall school desirability', '').strip()
+                influence = influence_el.text.replace('#', '').replace('overall school influence', '').strip()
             if desirability_el != None:
                 desirability = desirability_el.text.replace('#', '').replace('overall school desirability', '').strip()
             # endregion
