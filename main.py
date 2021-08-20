@@ -24,18 +24,20 @@ for discipline in discipline_options:
         discipline_page = requests.get(DISCIPLINE_URL)
         college_per_discipline_soup = BeautifulSoup(discipline_page.content, 'html.parser')
         all_college_items = college_per_discipline_soup.find_all('div', class_='school-card')
+        all_college_info = []
         for college_item in all_college_items:
             #region Desirability, Infuelence, Name, Rank
-            rank = college_item.find('div', class_='school-card__rank').text.replace('#', '').strip()
+            rank = int(college_item.find('div', class_='school-card__rank').text.replace('#', '').strip())
             school_name = college_item.find('h2', class_='school-card__school-name').text.strip()
+            slug = school_name.replace(' ', '-').lower()
             influence_el = college_item.find('div', class_='school-card__world-rank')
             desirability_el = college_item.find('div', class_='school-card__desirability-rank')
-            influence = ''
-            desirability = ''
+            influence = None
+            desirability = None
             if influence_el != None:
-                influence = influence_el.text.replace('#', '').replace('overall school influence', '').strip()
+                influence = int(influence_el.text.replace('#', '').replace('institution\'s overall influence', '').strip())
             if desirability_el != None:
-                desirability = desirability_el.text.replace('#', '').replace('overall school desirability', '').strip()
+                desirability = int(desirability_el.text.replace('#', '').replace('overall school desirability', '').strip())
             # endregion
 
 
@@ -43,13 +45,31 @@ for discipline in discipline_options:
             main_info_container = college_item.find('div', class_='school-card__stats')
             
             item_info_containers = main_info_container.find_all('div', class_='school-card__stat')
-            info = []
+            
+            tuition = None
+            acceptence = None
+            grad_rate = None
+            student_body = None
+            sat = None
+            act = None
             for item in item_info_containers:
-                ind_info = item.find_all('p')
-                info.append({'desc': ind_info[0].text.strip(), 'info': ind_info[1].text.strip()})
+                ind_info = item.find_all('p') 
+                desc = ind_info[0].text.strip().lower().replace(" ", "")
+                info = ind_info[1].text.strip().lower().replace(" ", "")
+                if desc == 'tuition+fees':
+                    tuition = int(info.replace('$', '').replace('k', '')) * 1000 # assuming colleges cost more than 1k
+                elif desc == 'acceptance':
+                    acceptence = int(info.replace('%', ''))/100
+                elif desc == 'graduation':
+                    grad_rate = int(info.replace('%', ''))/100
+                elif desc == 'student\xa0body':
+                    student_body = int(info.replace('$', '').replace('k', '').replace('<', '')) * 1000
+                else:
+                    split = info.split('/')
+                    sat = int(split[0])
+                    act = int(split[1])
                 
             # #endregion
-            
 
             # #region Link to Profile, Location
             middle_div_link_container = college_item.find('div', class_='school-card__bar')
@@ -57,13 +77,34 @@ for discipline in discipline_options:
 
             profile_btn_link = middle_div_link_container.find('a', href=True)['href']            
             location_el = middle_div_link_container.find('div', class_='school-card__city-label')
-            location = '?'
+            
+            
+            city = None
+            state = None
             if location_el != None:
-                location = location_el.text.strip()
-            print(location)
+                location = location_el.text.strip().split(',')
+                city = location[0]
+                state = location[1].strip()
             #endregion
-        
-        all_colleges = []
+            
+            indv_college_info = {
+                'rank': rank,
+                'school_name': school_name,
+                'influence': influence,
+                'desirability': desirability,
+                'city': city,
+                'state': state,
+                'tuition': tuition,
+                'acceptence': acceptence,
+                'grad_rate': grad_rate,
+                'student_body': student_body,
+                'sat': sat,
+                'act': act,
+                'slug': slug
+            }
+            
+
+    
 
 
     
