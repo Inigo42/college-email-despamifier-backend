@@ -75,7 +75,14 @@ for discipline in discipline_options:
             middle_div_link_container = college_item.find('div', class_='school-card__bar')
 
 
-            profile_btn_link = middle_div_link_container.find('a', href=True)['href']            
+            profile_btn_link = middle_div_link_container.find('a', href=True)['href']
+            profile_page = requests.get('https://academicinfluence.com' + profile_btn_link)       
+            profile_soup = BeautifulSoup(profile_page.content, 'html.parser')
+            contact_admissions_btn = profile_soup.find('a', class_='profile__button', href=True)
+            contact_admissions_btn_link = None
+            if contact_admissions_btn != None:
+                contact_admissions_btn_link = contact_admissions_btn['href']
+            print(contact_admissions_btn_link)
             location_el = middle_div_link_container.find('div', class_='school-card__city-label')
             
             
@@ -108,7 +115,8 @@ for discipline in discipline_options:
                     'student_body': student_body,
                     'sat': sat,
                     'act': act,
-                    'slug': slug
+                    'slug': slug,
+                    'admissions_website': contact_admissions_btn_link
                 })
     
     break # remove when not testing
