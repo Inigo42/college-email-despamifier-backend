@@ -20,7 +20,7 @@ all_colleges = []
 
 
 for discipline in discipline_options:
-    for i in range(0, 1): # change to 91 when looking for full data
+    for i in range(0, 2): # change to 91 when looking for full data
         DISCIPLINE_URL = 'https://academicinfluence.com/schools?country=United+States+of+America&discipline=' + discipline + '&page=' + str(i)
         discipline_page = requests.get(DISCIPLINE_URL)
         college_per_discipline_soup = BeautifulSoup(discipline_page.content, 'html.parser')
@@ -39,19 +39,19 @@ for discipline in discipline_options:
             if desirability_el != None:
                 desirability = int(desirability_el.text.replace('#', '').replace('overall school desirability', '').strip())
             # endregion
-
+            print(school_name)
 
             # #region Tution, Acceptence, Graduation, Student Body, Median SAT, Median ACT
-            main_info_container = college_item.find('div', class_='school-card__stats')
+            main_info_container = college_item.find('div', class_='school-card__stats-inner')
             
             item_info_containers = main_info_container.find_all('div', class_='school-card__stat')
-            
             tuition = None
             acceptence = None
             grad_rate = None
             student_body = None
             sat = None
             act = None
+            
             for item in item_info_containers:
                 ind_info = item.find_all('p') 
                 desc = ind_info[0].text.strip().lower().replace(" ", "")
@@ -68,7 +68,8 @@ for discipline in discipline_options:
                     split = info.split('/')
                     sat = int(split[0])
                     act = int(split[1])
-                
+            if tuition == None and acceptence == None and grad_rate == None and student_body == None and sat == None and act == None:
+                continue
             # #endregion
 
             # #region Link to Profile, Location
@@ -82,7 +83,7 @@ for discipline in discipline_options:
             contact_admissions_btn_link = None
             if contact_admissions_btn != None:
                 contact_admissions_btn_link = contact_admissions_btn['href']
-            print(contact_admissions_btn_link)
+            # print(contact_admissions_btn_link)
             location_el = middle_div_link_container.find('div', class_='school-card__city-label')
             
             
@@ -101,9 +102,10 @@ for discipline in discipline_options:
                     break
             
             
+            
             if not found_college:
                 all_colleges.append({
-                    discipline + '_rank': rank,
+                    discipline + '_rank': (i + 1) * rank,
                     'school_name': school_name,
                     'influence': influence,
                     'desirability': desirability,
@@ -118,6 +120,7 @@ for discipline in discipline_options:
                     'slug': slug,
                     'admissions_website': contact_admissions_btn_link
                 })
-    
+            
     break # remove when not testing
 
+print(all_colleges)
